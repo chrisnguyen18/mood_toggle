@@ -12,22 +12,37 @@ void main() {
 
 // Mood Model - The "Brain" of our app
 class MoodModel with ChangeNotifier {
-  String _currentMood = '😊 use your own img here ';
+  String _currentMood = '🤠';
+  Color _backgroundColor = Colors.yellow;
+
+  final Map<String, int> _counts = {
+    'happy': 0,
+    'sad': 0,
+    'excited': 0,
+  };
 
   String get currentMood => _currentMood;
+  Color get backgroundColor => _backgroundColor;
+  Map<String, int> get counts => _counts;
 
   void setHappy() {
-    _currentMood = '😊 use your own img here ';
+    _currentMood = '🤠';
+    _backgroundColor = Colors.yellow;
+    _counts['happy'] = (_counts['happy'] ?? 0) + 1;
     notifyListeners();
   }
 
   void setSad() {
-    _currentMood = '😢 use your own img here ';
+    _currentMood = '🥺';
+    _backgroundColor = Colors.blue;
+    _counts['sad'] = (_counts['sad'] ?? 0) + 1;
     notifyListeners();
   }
 
   void setExcited() {
-    _currentMood = '🎉 use your own img here ';
+    _currentMood = '💥';
+    _backgroundColor = Colors.orange;
+    _counts['excited'] = (_counts['excited'] ?? 0) + 1;
     notifyListeners();
   }
 }
@@ -48,7 +63,9 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final bg = context.watch<MoodModel>().backgroundColor;
     return Scaffold(
+      backgroundColor: bg,
       appBar: AppBar(title: Text('Mood Toggle Challenge')),
       body: Center(
         child: Column(
@@ -59,6 +76,7 @@ class HomePage extends StatelessWidget {
             MoodDisplay(),
             SizedBox(height: 50),
             MoodButtons(),
+            MoodCounter(),
           ],
         ),
       ),
@@ -89,21 +107,39 @@ class MoodButtons extends StatelessWidget {
           onPressed: () {
             Provider.of<MoodModel>(context, listen: false).setHappy();
           },
-          child: Text('Happy 😊 use your own img here '),
+          child: Text('🤠'),
         ),
         ElevatedButton(
           onPressed: () {
             Provider.of<MoodModel>(context, listen: false).setSad();
           },
-          child: Text('Sad 😢 use your own img here '),
+          child: Text('🥺'),
         ),
         ElevatedButton(
           onPressed: () {
             Provider.of<MoodModel>(context, listen: false).setExcited();
           },
-          child: Text('Excited 🎉 use your own img here '),
+          child: Text('💥'),
         ),
       ],
+    );
+  }
+}
+class MoodCounter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MoodModel>(
+      builder: (context, model, child) {
+        final c = model.counts;
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text(
+            'Happy: ${c['happy'] ?? 0}   •   Sad: ${c['sad'] ?? 0}   •   Excited: ${c['excited'] ?? 0}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+        );
+      },
     );
   }
 }
